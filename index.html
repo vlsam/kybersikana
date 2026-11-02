@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kyberšikana – hodina pro 1. ročník</title>
+<style>
+:root{
+  --bg:#0b0d14;--panel:#141824;--panel2:#1b2132;--line:#2a3249;
+  --txt:#e9ecf5;--mut:#9aa3bd;--red:#ff3b5c;--amber:#ffb020;--green:#2fd48a;--blue:#4cc3ff;--vio:#9b7bff;
+}
+*{box-sizing:border-box}
+html{scrollbar-gutter:stable}
+html,body{margin:0;background:var(--bg);color:var(--txt);font:17px/1.55 system-ui,Segoe UI,Roboto,sans-serif}
+body{min-height:100vh;background:radial-gradient(1200px 600px at 80% -10%,#3a0f24 0%,transparent 60%),var(--bg)}
+a{color:var(--blue)}
+header{position:sticky;top:0;z-index:20;background:#0b0d14ee;backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.bar{display:flex;gap:12px;align-items:center;padding:10px 20px;flex-wrap:wrap}
+.logo{font-weight:800;letter-spacing:.5px}.logo b{color:var(--red)}
+.timer{margin-left:auto;display:flex;align-items:center;gap:10px;font-variant-numeric:tabular-nums}
+.timer .t{font-size:22px;font-weight:700;min-width:70px;text-align:right}
+.timer .t.late{color:var(--red)}
+button,.btn{background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:8px 14px;font:inherit;cursor:pointer}
+button:hover{border-color:var(--blue)}
+button.primary{background:var(--red);border-color:var(--red);color:#fff;font-weight:700}
+nav.steps{display:flex;gap:6px;padding:0 20px 10px;overflow-x:auto}
+nav.steps button{white-space:nowrap;font-size:14px;padding:6px 12px;border-radius:999px}
+nav.steps button.on{background:var(--red);border-color:var(--red);color:#fff}
+nav.steps button small{opacity:.7;margin-left:4px}
+.prog{height:3px;background:var(--line)}.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--amber),var(--red));width:0;transition:width .4s}
+main{max-width:1100px;margin:0 auto;padding:28px 20px 90px}
+section.stage{display:none;animation:in .35s}
+section.stage.on{display:block}
+@keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1}}
+.kicker{color:var(--red);font-weight:700;text-transform:uppercase;letter-spacing:2px;font-size:13px}
+h1{font-size:clamp(34px,6vw,64px);line-height:1.05;margin:.2em 0 .3em}
+h2{font-size:clamp(26px,4vw,40px);margin:.2em 0 .5em;line-height:1.15}
+h3{margin:.2em 0 .4em}
+.lead{font-size:20px;color:#cfd5e8;max-width:760px}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}
+.card.red{border-color:#6b1c2e;background:linear-gradient(180deg,#2a0f18,var(--panel))}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:13px;border:1px solid var(--line);color:var(--mut)}
+.big{font-size:clamp(56px,10vw,110px);font-weight:900;line-height:1;color:var(--red)}
+.stat{text-align:center}
+.stat p{color:var(--mut);margin:.3em 0 0}
+.note{display:none;margin-top:22px;border-left:4px solid var(--amber);background:#2a2208;padding:12px 16px;border-radius:0 12px 12px 0;color:#ffe9b0;font-size:15px}
+body.teacher .note{display:block}
+.note b{color:var(--amber)}
+/* chat */
+.phone{max-width:420px;background:#0f1320;border:1px solid var(--line);border-radius:28px;padding:14px;margin:auto}
+.phone h4{margin:0 0 10px;text-align:center;color:var(--mut);font-weight:600;font-size:14px}
+.msg{max-width:85%;padding:8px 12px;border-radius:16px;margin:6px 0;background:var(--panel2);font-size:15px;opacity:0;transform:translateY(8px);transition:.4s}
+.msg.show{opacity:1;transform:none}
+.msg small{display:block;color:var(--vio);font-weight:700;font-size:12px}
+.msg.me{background:#5a1a2b;margin-left:auto}
+/* flip cards */
+.flip{perspective:800px;height:170px;cursor:pointer}
+.flip>div{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d}
+.flip.f>div{transform:rotateY(180deg)}
+.flip .a,.flip .b{position:absolute;inset:0;backface-visibility:hidden;border-radius:16px;padding:16px;border:1px solid var(--line);display:flex;flex-direction:column;justify-content:center}
+.flip .a{background:var(--panel)}.flip .a .e{font-size:34px}
+.flip .b{background:#2a0f18;border-color:#6b1c2e;transform:rotateY(180deg);font-size:15px}
+/* quiz */
+.q{min-height:100px;font-size:22px;font-weight:600}
+.opts{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+.opts button{flex:1;min-width:150px;padding:14px}
+.opts button.ok{background:#0f3a28;border-color:var(--green)}
+.opts button.no{background:#3a1019;border-color:var(--red)}
+.fb{min-height:110px;color:#cfd5e8}
+#btx{min-height:90px}
+#bnext,#qnext{visibility:hidden}
+#fakeFb{min-height:70px}
+/* footprint */
+.post{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.post .copies{font-size:42px;font-weight:900;color:var(--amber);font-variant-numeric:tabular-nums}
+/* video */
+.vid{display:flex;flex-direction:column;gap:8px}
+.vid .thumb{aspect-ratio:16/9;border-radius:12px;background:linear-gradient(135deg,#3a0f24,#0f1320);display:grid;place-items:center;font-size:54px}
+ol.q2 li{margin:.5em 0}
+.steps4{counter-reset:s}
+.steps4 .card{position:relative;padding-top:44px}
+.steps4 .card::before{counter-increment:s;content:counter(s);position:absolute;top:10px;left:16px;width:28px;height:28px;border-radius:50%;background:var(--red);display:grid;place-items:center;font-weight:800;font-size:15px}
+table{width:100%;border-collapse:collapse}
+td,th{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;font-size:15px}
+th{color:var(--mut);font-weight:600}
+.foot{position:fixed;left:0;right:0;bottom:0;background:#0b0d14ee;border-top:1px solid var(--line);padding:10px 20px;display:flex;gap:10px;align-items:center}
+.foot .sp{flex:1;color:var(--mut);font-size:14px}
+.warn{background:#2a0f18;border:1px solid #6b1c2e;border-radius:12px;padding:12px 16px;font-size:15px}
+
+.five{grid-template-columns:repeat(5,1fr);gap:10px}
+.five .card{padding:14px;font-size:15px;line-height:1.4}
+.five .card h3{font-size:17px}
+.five .big{font-size:44px!important}
+@media(max-width:1000px){.five{grid-template-columns:repeat(2,1fr)}}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.law{display:grid;gap:10px;grid-template-columns:repeat(4,1fr);margin-top:16px}
+.lawc{cursor:pointer;position:relative;padding:12px;border-radius:14px;font-size:14px;line-height:1.4;min-height:150px;display:flex;flex-direction:column;gap:6px;background:var(--panel);border:1px solid var(--line);transition:border-color .3s,background .3s}
+.lawc:hover{border-color:var(--blue)}
+.lawc .em{font-size:22px}
+.lawc .hint{position:absolute;left:12px;bottom:10px;color:var(--mut);font-size:12px}
+.lawc .res{visibility:hidden;margin-top:auto;border-top:1px solid var(--line);padding-top:6px;font-size:13px}
+.lawc.open .hint{display:none}.lawc.open .res{visibility:visible;animation:in .35s}
+.lawc.open.yes{background:linear-gradient(180deg,#2a0f18,var(--panel));border-color:#6b1c2e}
+.lawc.open.no{background:linear-gradient(180deg,#0f2a1e,var(--panel));border-color:#1c6b49}
+.res .par{font-size:20px;font-weight:900;color:var(--red);line-height:1.1}
+.res .par.g{color:var(--green);font-size:15px}
+@media(max-width:900px){.law{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.two{grid-template-columns:1fr}body{font-size:16px}.foot .sp{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="logo">KYBER<b>ŠIKANA</b></div>
+      </div>
+  <nav class="steps" id="nav"></nav>
+  <div class="prog"><i id="pb"></i></div>
+</header>
+
+<main>
+
+<!-- 1: CO TO JE -->
+<section class="stage" data-min="8" data-title="Co to je">
+  <div class="kicker">Základ</div>
+  <h2>Kyberšikana = šikana, která vás následuje domů</h2>
+  <p class="lead">Agrese vůči jedinci nebo skupině přes mobil, počítač a internet – často opakovaná, záměrná a s nepoměrem sil (E-Bezpečí, UP Olomouc).</p>
+  <div class="grid five" style="margin:18px 0">
+        <div class="card red"><div class="big" style="font-size:54px">67 %</div><p style="margin:.2em 0 0">mladých ve věku 11–21 let bylo přímou obětí šikany na internetu<br><small style="color:var(--mut)">Ipsos, ČT24, 21. 5. 2025</small></p></div>
+    <div class="card"><span class="pill">24/7</span><h3>Nikdy to nekončí</h3><p>Dřív šikana skončila za dveřmi školy. Teď se ti rozsvítí displej i o půlnoci.</p></div>
+    <div class="card"><span class="pill">publikum</span><h3>Vidí to všichni</h3><p>Jedna urážka v třídním chatu = desítky svědků. Jeden screenshot = stovky.</p></div>
+    <div class="card"><span class="pill">anonymita</span><h3>Útočník se schová</h3><p>Falešný účet snižuje zábrany. Útočí i ti, kdo by to „naživo“ neudělali.</p></div>
+    <div class="card"><span class="pill">stopa</span><h3>Nic se nesmaže</h3><p>Zkuste to vyzkoušet níže ↓</p></div>
+  </div>
+
+  <h3>Formy kyberšikany – klikni a otoč</h3>
+  <div class="grid" id="forms"></div>
+
+  <h3 style="margin-top:28px">Mini-experiment: „Smazat“</h3>
+  <div class="card post">
+    <div style="flex:1;min-width:220px">Trapná fotka spolužáka v chatu 📸<br><small style="color:var(--mut)">Autor ji za 2 minuty smaže. Co se stane?</small></div>
+    <div style="text-align:center"><div class="copies" id="copies">3</div><small style="color:var(--mut)">lidí ji má uloženou</small></div>
+    <button class="primary" id="delBtn">🗑 Smazat příspěvek</button>
+  </div>
+  <p id="delMsg" style="color:var(--amber);min-height:28px"></p>
+</section>
+
+<!-- 1b: PROC -->
+<section class="stage" data-title="Proč a jak to bolí">
+  <div class="kicker">Obě strany obrazovky</div>
+  <h2>Proč to lidé dělají? A co to dělá s člověkem?</h2>
+  <div class="two" style="margin-top:16px">
+    <h3 style="margin:0">Proč útočí</h3><h3 style="margin:0">Co zažívá oběť</h3>
+    <div class="card"><b>😴 Nuda a „sranda“</b><p style="margin:.2em 0 0;color:var(--mut)">„Byl to jen vtip.“ Nevidí oběť, takže nevidí, že se nesměje.</p></div><div class="card red"><b>😶 Stud a izolace</b><p style="margin:.2em 0 0;color:var(--mut)">Stydí se, myslí si, že za to může sama. Většina se nikomu nesvěří.</p></div><div class="card"><b>👥 Tlak party</b><p style="margin:.2em 0 0;color:var(--mut)">Kdo se nepřidá, může být další. Útočí, aby patřil do skupiny.</p></div><div class="card red"><b>😰 Úzkost a nespavost</b><p style="margin:.2em 0 0;color:var(--mut)">Telefon se stane zdrojem strachu. Nemůže se „vypnout“ ani doma.</p></div><div class="card"><b>🕶 Anonymita</b><p style="margin:.2em 0 0;color:var(--mut)">Za obrazovkou se mizí zábrany. Co bys neřekl do očí, napíšeš.</p></div><div class="card red"><b>📉 Pokles výkonu a absence</b><p style="margin:.2em 0 0;color:var(--mut)">Zhoršené známky, vyhýbání se škole, ztráta zájmů.</p></div><div class="card"><b>🔥 Pomsta a moc</b><p style="margin:.2em 0 0;color:var(--mut)">Reakce na vlastní zranění, nebo touha mít kontrolu nad někým.</p></div><div class="card red"><b>🆘 Vážné následky</b><p style="margin:.2em 0 0;color:var(--mut)">U dlouhodobé šikany se objevují deprese a myšlenky na sebepoškozování. Pomoc existuje – 116 111.</p></div>
+  </div>
+  <div class="card" style="margin-top:16px"><b>Zamysli se:</b> Kdybys byl na druhé straně obrazovky a viděl ten výraz v obličeji, napsal bys to?</div>
+</section>
+
+<!-- 2: VIDEO -->
+<section class="stage" data-min="10" data-title="Video">
+  <div class="kicker">Příběh</div>
+  <h2>Film „Na hory“ (Seznam se bezpečně, 2018)</h2>
+  <p class="lead">16minutový krátký film režiséra Braňa Holička o chlapci, který se stane obětí online vydírání. Natočeno podle skutečné události. Hlavní roli hraje Lukáš Veřtát.</p>
+  <div class="grid" style="margin:18px 0">
+    <a class="card vid" href="https://www.stream.cz/seznam-se-bezpecne/na-hory-231372" target="_blank" rel="noopener" style="text-decoration:none;color:inherit">
+      <div class="thumb">🎬</div><b>Celý film – Na hory</b><small style="color:var(--mut)">Stream.cz · Seznam se bezpečně · 16 min</small></a>
+    <a class="card vid" href="https://blog.seznam.cz/2018/05/film-na-hory-z-produkce-seznam-se-bezpecne-upozornuje-na-problematiku-kybersikany/" target="_blank" rel="noopener" style="text-decoration:none;color:inherit">
+      <div class="thumb">📰</div><b>Blog Seznam.cz o filmu</b><small style="color:var(--mut)">Kontext, obsazení, premiéra</small></a>
+    <a class="card vid" href="https://www.youtube.com/@ebezpeci" target="_blank" rel="noopener" style="text-decoration:none;color:inherit">
+      <div class="thumb">▶</div><b>YouTube kanál E-Bezpečí</b><small style="color:var(--mut)">Kratší videa a spoty k online bezpečí</small></a>
+  </div>
+
+  <div class="grid">
+    <div class="card"><h3>Otázky PŘED</h3><ol class="q2"><li>Co si myslíte, že se stane?</li><li>Jak by podle vás vypadal člověk, který se stane obětí vydírání?</li></ol></div>
+    <div class="card red"><h3>Otázky PO (pracujte ve dvojicích, 3 min)</h3><ol class="q2"><li>Kde byl <b>první moment</b>, kdy se dalo situaci zastavit?</li><li>Proč se hrdina nikomu nesvěřil?</li><li>Kdo další mohl pomoci – a co by musel vědět?</li><li>Co by se změnilo, kdyby řekl rodičům hned?</li></ol></div>
+  </div>
+</section>
+
+<!-- 3: QUIZ -->
+<section class="stage" data-min="8" data-title="Je to šikana?">
+  <div class="kicker">Aktivita 1</div>
+  <h2>Šikana, hraniční, nebo jen konflikt?</h2>
+  <p class="lead">Dvanáct situací. Zvedněte ruku pro svou odpověď, pak ji odkryjeme.</p>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between"><span class="pill" id="qn">1 / 12</span><span class="pill" id="qs">Skóre: 0</span></div>
+    <div class="q" id="qt"></div>
+    <div class="opts" id="qo"></div>
+    <div class="fb" id="qf"></div>
+    <button id="qnext" class="primary">Další →</button>
+  </div>
+</section>
+
+<!-- 4: SVEDEK -->
+<section class="stage" data-min="6" data-title="Co uděláš?">
+  <div class="kicker">Aktivita 2 · Svědek</div>
+  <h2 id="bt">Co uděláš?</h2>
+  <div class="card red">
+    <div style="display:flex;justify-content:space-between"><span class="pill" id="bn">1 / 8</span></div>
+    <p style="font-size:20px" id="btx"></p>
+    <div class="opts" id="bo"></div>
+    <div class="fb" id="bf"></div>
+    <button id="bnext" class="primary">Další situace →</button>
+  </div>
+  <p style="color:var(--mut)">Většina svědků neudělá nic – a to přesně útočníkovi stačí. Svědek je třetí strana, která rozhoduje.</p>
+</section>
+
+<!-- 5: PRAVO -->
+<section class="stage" data-min="4" data-title="Zákon">
+  <div class="kicker">Následky</div>
+  <h2>Trestný čin, nebo ne?</h2>
+  <p class="lead">Trestní odpovědnost začíná v <b>15 letech</b>. Rozhodni se a klikni. Ne všechno zlé je trestné a ne všechno nevinné je v pořádku.</p>
+  <div class="law" id="law"></div>
+</section>
+
+<!-- 5b: TECH -->
+<section class="stage" data-title="Technika">
+  <div class="kicker">Technický pohled</div>
+  <h2>Jak se v tom zorientovat jako technik</h2>
+  <div class="grid" style="margin:16px 0">
+    <div class="card"><span class="pill">důkaz</span><h3>Jak uložit důkaz</h3>
+      <ul style="margin:.3em 0 0;padding-left:20px">
+        <li>screenshot celé obrazovky: datum, čas, jméno účtu, text</li>
+        <li>zkopíruj odkaz (URL) na příspěvek nebo profil</li>
+        <li>nahraj video obrazovky, když zprávy mizí (Snapchat, stories)</li>
+        <li>nic neupravuj, neořezávej a nemaž</li>
+        <li>uložit na bezpečné místo (cloud, e-mail rodiči)</li>
+      </ul></div>
+    <div class="card"><span class="pill">soukromí</span><h3>Co o tobě prozradí fotka</h3>
+      <p style="margin:.3em 0 0">Fotky mohou obsahovat metadata (EXIF): čas, model telefonu a někdy i <b>GPS polohu</b>. Sociální sítě je většinou odstraní, ale přímé sdílení souboru ne. Vypni polohu u fotoaparátu.</p></div>
+    <div class="card"><span class="pill">účet</span><h3>Zabezpeč si účty</h3>
+      <ul style="margin:.3em 0 0;padding-left:20px"><li>dvoufázové ověření (2FA)</li><li>unikátní hesla (správce hesel)</li><li>nastav profil jako soukromý</li><li>zkontroluj, kdo vidí tvé příběhy</li></ul></div>
+  </div>
+  <h3>Mini-hra: Detektiv falešného profilu</h3>
+  <div class="card">
+    <p><b>@kate_real_2310</b> píše lidem ze třídy urážlivé zprávy o jedné spolužačce. Klikni na každý údaj a zjisti, jestli je podezřelý.</p>
+    <div class="opts" id="fakeOpts"></div>
+    <div class="fb" id="fakeFb"></div>
+  </div>
+</section>
+
+<!-- 6: POMOC -->
+<section class="stage" data-min="3" data-title="Pomoc">
+  <div class="kicker">Co dělat</div>
+  <h2>Plán, který si zapamatujete: <span style="color:var(--red)">S·T·O·P</span></h2>
+  <div class="grid steps4" style="margin:16px 0">
+    <div class="card"><h3>Stop</h3><p>Neodpovídej útočníkovi. Nemaž zprávy, nepouštěj se do hádky.</p></div>
+    <div class="card"><h3>Teď ulož důkazy</h3><p>Screenshoty s datem, odkazy, jména účtů. Nic nemaž.</p></div>
+    <div class="card"><h3>Oznam to</h3><p>Rodič, učitel, třídní, školní metodik prevence. Nahlas obsah na platformě.</p></div>
+    <div class="card"><h3>Podpoř oběť</h3><p>Napiš jí soukromě, že jsi na její straně. Nebuď sám/sama.</p></div>
+  </div>
+  <h3>Jak nahlásit na sociální síti</h3>
+  <div class="grid" style="margin-bottom:16px">
+    <div class="card"><b>1) Najdi menu</b><p style="margin:.2em 0 0;color:var(--mut)">U příspěvku, zprávy nebo profilu: tři tečky ⋯ nebo dlouhý stisk.</p></div>
+    <div class="card"><b>2) Nahlásit</b><p style="margin:.2em 0 0;color:var(--mut)">Vyber důvod: šikana, obtěžování, falešný účet, nahota.</p></div>
+    <div class="card"><b>3) Zablokuj</b><p style="margin:.2em 0 0;color:var(--mut)">Zablokuj účet útočníka, ale nejdřív ulož důkazy.</p></div>
+    <div class="card"><b>🏫 Ve škole</b><p style="margin:.2em 0 0;color:var(--mut)">Třídní učitel, výchovný poradce, školní metodik prevence, vedení školy.</p></div>
+  </div>
+  <h3>Pomoc ihned</h3>
+  <div class="grid">
+    <div class="card red"><div class="big" style="font-size:44px">116 111</div><b>Linka bezpečí</b><p style="color:var(--mut);margin:.3em 0 0">Zdarma, nonstop, pro děti a mladé do 18 let.</p></div>
+    <div class="card red"><div class="big" style="font-size:44px">112</div><b>Tísňová linka</b><p style="color:var(--mut);margin:.3em 0 0">Při bezprostředním ohrožení. (Policie ČR: 158.)</p></div>
+    <div class="card"><div style="font-size:26px;font-weight:800">napisnam.cz</div><b>Online poradna E-Bezpečí</b><p style="color:var(--mut);margin:.3em 0 0">Anonymně, při vydírání nebo ohrožení. Zdroj: e-bezpeci.cz</p></div>
+  </div>
+</section>
+
+<!-- 7: ZAVER -->
+<section class="stage" data-min="1" data-title="Závěr">
+  <div class="kicker">Závěr</div>
+  <h2>Co si z toho odnášíš?</h2>
+  <p class="lead">„Byl to jen vtip“ už nestačí. Důležité je, jak to vnímá ten druhý.</p>
+  <div class="grid" style="margin:16px 0">
+    <div class="card"><h3>Pravidla našeho třídního chatu</h3><p style="color:var(--mut);margin-top:0">Odškrtněte 3, na kterých se shodneme:</p>
+      <div id="rules"></div></div>
+    <div class="card"><h3>Lístek na odchodu</h3><p>Na papírek (anonymně): <i>„Jedna věc, kterou udělám jinak, když uvidím posměch v chatu…“</i></p></div>
+    <div class="card red"><h3>Řekni to hlasitě</h3><p style="font-size:22px;font-weight:700">Mlčení je souhlas. Dívat se je rozhodnutí.</p></div>
+  </div>
+</section>
+
+</main>
+
+<div class="foot">
+  <button id="prev">← Zpět</button>
+  <span class="sp">Šipky ← → listují</span>
+  <button id="next" class="primary">Další →</button>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const stages=$$('section.stage'); let cur=0;
+const nav=$('#nav');
+stages.forEach((s,i)=>{const b=document.createElement('button');b.innerHTML=s.dataset.title;b.onclick=()=>go(i);nav.appendChild(b)});
+function go(i){
+  cur=Math.max(0,Math.min(stages.length-1,i));
+  stages.forEach((s,k)=>s.classList.toggle('on',k===cur));
+  $$('#nav button').forEach((b,k)=>b.classList.toggle('on',k===cur));
+  $('#prev').style.visibility=cur?'visible':'hidden';
+  $('#next').style.visibility=cur<stages.length-1?'visible':'hidden';
+  scrollTo({top:0});
+  $('#pb').style.width=((cur+1)/stages.length*100)+'%';
+}
+$('#prev').onclick=()=>go(cur-1);$('#next').onclick=()=>go(cur+1);
+addEventListener('keydown',e=>{
+  if(e.target.matches('input,textarea'))return;
+  if(e.key==='ArrowRight')go(cur+1);
+  if(e.key==='ArrowLeft')go(cur-1);
+});
+/* forms */
+const forms=[
+ ['🔥','Flaming','Hádka plná urážek a vulgarit, často ve veřejné diskusi nebo chatu.'],
+ ['🎭','Falešný profil','Někdo píše pod tvým jménem nebo vytvoří účet jen na zesměšnění.'],
+ ['📹','Happy slapping','Natáčení ponižování nebo napadení a sdílení videa.'],
+ ['🚫','Vyloučení','Skupina vytvoří chat bez jedné osoby, aby ji pomlouvala nebo izolovala.'],
+ ['🔓','Outing','Zveřejnění soukromého tajemství nebo citlivé informace.'],
+ ['📸','Sextortion','Vydírání intimními fotkami. Trestný čin. Pomoc: 116 111, napisnam.cz.'],
+ ['👁','Stalking','Dlouhodobé sledování a obtěžování, zpráv desítky denně.'],
+ ['🗣','Pomluvy','Šíření nepravdivých informací, kterým lidé věří.'],
+];
+$('#forms').innerHTML=forms.map(f=>`<div class="flip"><div><div class="a"><span class="e">${f[0]}</span><b>${f[1]}</b><small style="color:var(--mut)">klikni</small></div><div class="b">${f[2]}</div></div></div>`).join('');
+$$('.flip').forEach(f=>f.onclick=()=>f.classList.toggle('f'));
+
+/* footprint */
+let copies=3;
+$('#delBtn').onclick=()=>{
+  copies+=Math.floor(Math.random()*9)+4;$('#copies').textContent=copies;
+  $('#delMsg').textContent='Příspěvek je smazán… ale ti, kdo si ho uložili nebo přeposlali, ho mají dál. Už ho nikdo nevrátí.';
+};
+
+/* quiz */
+const Q=[
+ ['Dva spolužáci se v chatu pohádají. Obě strany si napíšou ostré věci. Za hodinu je to zapomenuté.','konflikt','Je to konflikt mezi vyrovnanými stranami, jednorázový. Může eskalovat, ale zatím to šikana není.'],
+ ['Spolužačka dostává tři týdny každý večer posměšné zprávy z anonymního účtu.','sikana','Opakované, záměrné, anonymní útočník, oběť se neubrání. Klasická kyberšikana.'],
+ ['Někdo natočí pád spolužáka na chodbě a dá to na TikTok s posměšným popiskem.','sikana','Happy slapping / ponižování před publikem. Jedno video stačí – dopad je velký a nevratný.'],
+ ['Skupina založí chat třídy bez jednoho spolužáka a píše tam o něm věci.','sikana','Vyloučení + pomluvy. Oběť se to dozví a nemůže reagovat.'],
+ ['Kamarádi si navzájem posílají memes s ostrými hláškami a všichni se smějí.','hranice','Hraniční: záleží, jestli to je oboustranné a jestli to někomu skutečně nevadí. Pokud se někdo přestane smát, je to špatně.'],
+ ['Někdo vytvoří falešný profil na tvé jméno a píše z něj ostatním urážlivé věci.','sikana','Zneužití identity. Kyberšikana a potenciálně trestný čin (pomluva, zneužití osobních údajů).'],
+ ['Kamarádka ti pošle soukromou fotku „jen pro tebe“. Ty ji přepošleš dalším lidem, protože je legrační.','sikana','Zneužití důvěry a soukromého materiálu. Že se to „stalo mezi kamarády“, na tom nic nemění – člověk tu fotku nechtěl sdílet.'],
+ ['Pod každým videem, které spolužák dá na TikTok, se objeví komentáře „cringe“ a „smaž to“ z několika různých účtů.','sikana','Opakované, koordinované, z více účtů. Oběť se cítí obklíčená a přestane tvořit nebo se stáhne.'],
+ ['Dva spolužáci se v chatu pohádají o fotbale. Každý má jiný názor, vymění si argumenty a na konci si napíšou „ok, uvidíme“.','konflikt','Rozdílný názor není šikana. Dokud se lidé respektují, nikdo nemá navrch a nikomu to neubližuje.'],
+ ['Kamarád tě v herním chatu pořád „trolluje“. Ty ho trolluješ zpátky a oba se u toho smějete.','hranice','Hraniční: oboustranné a dobrovolné. Jakmile se jeden přestane bavit, nebo se přidá parta proti jednomu, je to jinak.'],
+ ['Někdo ti napíše: „Pošli mi svou fotku bez trička, nebo ukážu ostatním naše soukromé zprávy.“','sikana','Vydírání. Je to trestný čin a vina je vždy na útočníkovi. Neodpovídej, ulož důkazy a hned řekni dospělému nebo volej 116 111.'],
+ ['Někdo založí v Instagramu anketu „Kdo je ve třídě nejošklivější?“ s fotkami spolužáků.','sikana','Ponižování před publikem. Anketa dělá z lidí veřejnou zábavu a hlasuje se o jejich vzhledu.'],
+];
+const L={konflikt:'Jen konflikt',hranice:'Hraniční',sikana:'Kyberšikana'};
+let qi=0,qs=0,answered=false;
+function showQ(){
+  answered=false;const q=Q[qi];
+  $('#qn').textContent=`${qi+1} / ${Q.length}`;$('#qs').textContent='Skóre: '+qs;
+  $('#qt').textContent=q[0];$('#qf').textContent='';$('#qnext').style.visibility='hidden';
+  $('#qo').innerHTML=Object.keys(L).map(k=>`<button data-k="${k}">${L[k]}</button>`).join('');
+  $$('#qo button').forEach(b=>b.onclick=()=>{
+    if(answered)return;answered=true;const ok=b.dataset.k===q[1];if(ok)qs++;
+    $$('#qo button').forEach(x=>{if(x.dataset.k===q[1])x.classList.add('ok')});
+    if(!ok)b.classList.add('no');
+    $('#qf').innerHTML=`<b>${ok?'✔ Správně.':'✖ Ne tak úplně.'}</b> ${q[2]}`;
+    $('#qs').textContent='Skóre: '+qs;
+    $('#qnext').style.visibility='visible';
+    $('#qnext').textContent=qi<Q.length-1?'Další →':'Hotovo – skóre '+qs+' / '+Q.length;
+  });
+}
+$('#qnext').onclick=()=>{if(qi<Q.length-1){qi++;showQ()}else{qi=0;qs=0;showQ()}};
+showQ();
+
+/* bystander */
+const BS=[
+ ['Ty jsi ten 23. člen skupiny','Do třídního chatu přijde zesměšňující fotka Honzy z tělocviku. Už tam je 14 reakcí 😂. Honza je ve skupině a nic nepíše.',
+  [['😂 Přidám reakci','Přidal/a ses k 15 reakcím. Honza vidí, že se smějí všichni. Útočník ví, že má publikum.'],
+   ['🙈 Ignoruji, scrolluji dál','Nepřispěl/a ses k šikaně, ale ani jsi ji nezastavil/a. Útočník to bere jako souhlas.'],
+   ['💬 Napíšu Honzovi soukromě','Dobrý krok: Honza ví, že není sám. Ještě lepší je přidat i důkaz a dospělého.'],
+   ['📸 Uložím důkaz a oznámím dospělému','Nejúčinnější. Důkaz zůstane, i když to autor smaže, a dospělý může zasáhnout.']]],
+ ['Anonymní účet','Na Instagramu se objeví účet „Hlášky z 1.A“, který zveřejňuje urážky na konkrétní spolužačky. Všichni ho sledují, ty taky.',
+  [['👍 Dám like, je to vtipné','Like zvyšuje dosah účtu a motivuje autora. Oběti to ubližuje, i když to „jen sleduješ“.'],
+   ['🚫 Přestanu ho sledovat a mlčím','Aspoň nepodporuješ dosah. Účet ale funguje dál a pomoc nepřišla.'],
+   ['🚩 Nahlásím účet na platformě','Dobrý krok: Instagram umí takový účet smazat. Dodej screenshoty pro jistotu.'],
+   ['📸 Screenshoty a řeknu to třídnímu','Nejúčinnější. Škola může zasáhnout a anonymní účet jde dohledat.']]],
+ ['Kamarád jako útočník','Tvůj nejlepší kamarád pořád posílá do chatu hlášky o spolužákovi s nadváhou. Všichni se smějí, ty taky, ale vnitřně se ti to nelíbí.',
+  [['🤝 Zasměju se, ať to nekazím','Tvůj smích je pro něj souhlas. Kamarád pokračuje a spolužák trpí.'],
+   ['💬 Řeknu mu soukromě, že to přehání','Dobré: kamarád to od tebe vezme líp než od cizího. Většina lidí přestane, když je jeden kamarád proti.'],
+   ['✋ Napíšu do chatu: „nechte toho“','Odvážné. Přeruší to dynamiku, protože ostatní přestanou mít pocit, že to všichni berou jako zábavu.'],
+   ['📸 Řeknu to učiteli','Správně, když to nepřestane. Kamarád to nemusí pochopit hned, ale spolužák má oporu.']]],
+ ['Intimní fotka','Spolužačka někomu poslala své intimní foto a on ho teď rozeslal do několika skupin. Ty ho dostaneš taky.',
+  [['📤 Přepošlu dál, ať se to ví','Šíření intimních fotek osoby do 18 let je závažný trestný čin. Přeposláním se do něj zapleteš taky.'],
+   ['🗑 Smažu a zapomenu','Aspoň nešíříš dál. Ale nikdo to neřeší a dívka může být vydírána.'],
+   ['💬 Napíšu spolužačce, že jsem proti','Dobrý krok: ví, že má podporu. Nic dalšího neposílej, foto neukládej.'],
+   ['🆘 Nepřeposílám, hlásím dospělému a na 116 111','Nejlepší. Foto nepřeposílej ani neukládej. Dospělý a policie mají postup, jak ho smazat.']]],
+ ['Herní chat','V online hře ti spoluhráči nadávají a vyhrožují jednomu nováčkovi, aby přestal hrát. Moderátor tam není.',
+  [['🤐 Hraju dál, není to můj problém','Nováček odejde a útočníci to berou jako vítězství.'],
+   ['🔇 Ztlumím ty, co nadávají','Chrání to tebe, ale nováček dál trpí.'],
+   ['🚩 Nahlásím hráče ve hře','Dobrý krok: většina her umí hráče zablokovat.'],
+   ['🤝 Napíšu nováčkovi „ignoruj je“ a nahlásím je','Nejlepší: podpoříš ho a zároveň zasáhneš.']]],
+ ['Falešný profil','Někdo vytvořil profil na jméno tvého spolužáka a píše z něj ostatním urážlivé zprávy. Lidi mu začínají nadávat.',
+  [['🙈 Řeknu, že to nevím a nic víc','Spolužák o profilu možná ani neví a jeho pověst se ničí.'],
+   ['📢 Řeknu ostatním, že to není on','Dobré: omezí to škody. Přidej ještě oznámení.'],
+   ['🚩 Nahlásím profil jako falešný','Dobrý krok: platformy takové profily mažou.'],
+   ['💬 Dám spolužákovi vědět a nabídnu pomoc','Nejlepší: neví o tom, a potřebuje to co nejdřív vědět.']]],
+ ['Vydírání','Kamarádka ti řekne, že jí nějaký kluk z internetu vyhrožuje, že rozešle její fotky, pokud mu nepošle další. Prosí tě, ať to nikomu neřekneš.',
+  [['🤐 Slíbím, že mlčím','Lákavé, ale mlčení vydírání nezastaví. Vydírání je trestný čin a kamarádka potřebuje pomoc dospělých.'],
+   ['💬 Poradím jí, ať se ho zeptá, co chce','Nejhorší rada: komunikace s vyděračem situaci zhoršuje.'],
+   ['🙌 Přesvědčím ji, ať to řekne rodičům','Správně. Ať už nepošle žádné další fotky a uloží všechno jako důkaz.'],
+   ['🆘 Půjdu s ní za dospělým nebo zavolám 116 111','Nejlepší. Nenechávej ji v tom samotnou. Pomůže i napisnam.cz.']]],
+ ['Komentáře pod videem','Spolužák dal na TikTok video, jak zpívá. Dole je spousta komentářů „cringe“, „smaž to“, „trapas“. Někteří jsou z tvé třídy.',
+  [['👎 Přidám taky komentář','Přidáváš se k šikaně. Spolužák to uvidí a přestane tvořit.'],
+   ['🙈 Nechám to být','Nepodílíš se, ale nezastavuješ. Spolužák zůstane sám.'],
+   ['❤️ Napíšu pozitivní komentář a lajknu','Dobré: ukazuješ oběti i ostatním, že není sám.'],
+   ['🚩 Nahlásím nenávistné komentáře a napíšu mu','Nejlepší: platforma komentáře smaže a spolužák ví, že ho někdo podporuje.']]],
+];
+let bi=0;
+function showB(){
+  const s=BS[bi];
+  $('#bn').textContent=`${bi+1} / ${BS.length}`;$('#bt').textContent=s[0];
+  $('#btx').innerHTML=s[1]+' <b>Co uděláš?</b>';
+  const order=[0,1,2,3].sort(()=>Math.random()-.5);
+  $('#bo').innerHTML=order.map(i=>`<button data-i="${i}">${s[2][i][0]}</button>`).join('');
+  $('#bf').innerHTML='';$('#bnext').style.visibility='hidden';
+  $$('#bo button').forEach(b=>b.onclick=()=>{
+    $('#bf').innerHTML=`<b>${s[2][b.dataset.i][0]}</b><br>${s[2][b.dataset.i][1]}`;
+    $('#bnext').style.visibility='visible';
+    $('#bnext').textContent=bi<BS.length-1?'Další situace →':'Znovu od začátku';
+  });
+}
+$('#bnext').onclick=()=>{bi=(bi+1)%BS.length;showB()};
+showB();
+
+/* law */
+const LAW=[
+ ['💸','Napíšeš spolužákovi: „Pošli 500 Kč, nebo všem ukážu tvoji fotku z koupelny.“',1,'§ 175','Vydírání','Nátlak pod hrozbou.'],
+ ['📱','Pošleš do skupiny intimní fotku 16leté kamarádky, kterou jsi dostal/a soukromě.',1,'§ 192','Dětská pornografie','Materiály osob do 18 let chrání zákon nejpřísněji.'],
+ ['🔁','Dlouhodobě píšeš bývalé partnerce desítky zpráv denně, i když tě zablokovala.',1,'§ 354','Nebezpečné pronásledování','Opakované obtěžování, které vzbuzuje obavy.'],
+ ['🗣','Rozšíříš, že spolužačka kradla v obchodě. Není to pravda a víš to.',1,'§ 184','Pomluva','Šíření nepravdy, která škodí pověsti.'],
+ ['⚠️','Napíšeš spolužákovi: „Až tě potkám, zabiju tě.“ Spolužák se bojí.',1,'§ 353','Nebezpečné vyhrožování','Hrozba, která vzbudí důvodnou obavu.'],
+ ['😒','V hádce napíšeš spolužákovi jednou: „Ty seš ale trapák.“',0,'','Není trestný čin','Hrubé, ale řeší to škola, ne soud.'],
+ ['🚪','Založíš třídní chat bez jednoho spolužáka a neberete ho na akce.',0,'','Není trestný čin','Je to ale šikana, kterou škola řeší.'],
+ ['🖼','Pošleš do chatu posměšný sticker se spolužákem. Nic nahého, nic nepravdivého.',0,'','Obvykle není trestný čin','Je to šikana a může jít o zásah do ochrany osobnosti.'],
+];
+$('#law').innerHTML=LAW.map(l=>`<div class="lawc ${l[2]?'yes':'no'}"><div class="em">${l[0]}</div><div>${l[1]}</div><div class="hint">▸ klikni</div><div class="res">${l[2]?`<div class="par">${l[3]}</div><b>${l[4]}</b>`:`<div class="par g">✔ ${l[4]}</div>`}<br>${l[5]}</div></div>`).join('');
+$$('.lawc').forEach(c=>c.onclick=()=>c.classList.toggle('open'));
+
+go(0);
+</script>
+</body>
+</html>
